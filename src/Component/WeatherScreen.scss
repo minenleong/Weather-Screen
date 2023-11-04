@@ -15,3 +15,23 @@
 .ws-buttons {
     width: auto;
 }
+
+.search-history {
+    margin-top: 20px;
+  }
+  
+  .history-list {
+    list-style: none; /* Remove bullet points */
+    padding: 0;
+  }
+  
+  .history-list li {
+    margin-bottom: 10px;
+    background-color: #f7f7f7;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+  }
+  
