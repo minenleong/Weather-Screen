@@ -23,7 +23,7 @@ class Weather extends Component {
       loading: true,
       currentTime: new Date(),
       apiKey: "06a17fbd827afd00eda7804891ec5c19",
-      lat: 1.29027,
+      lat: 1.29027, // On default set to Singapore lat and lon
       lon: 103.851959,
       cityName: "",
       countryName: "",
@@ -61,6 +61,7 @@ class Weather extends Component {
             weatherData: data,
             loading: false,
             cloudImg: data.weather[0].description,
+            currentTime: moment().format("MMMM Do YYYY, h:mm:ss a"),
           });
         } else {
           toast.error("No such City or Country!");
@@ -71,11 +72,10 @@ class Weather extends Component {
       }
     };
     xhr.send();
-    this.setState({
-      currentTime: moment().format("MMMM Do YYYY, h:mm:ss a"),
-    });
   };
 
+  // As OpenWeather does not have build-in lat and lon
+  // Will need to find via city/countrycode to get the lat and lon
   convertCountryCityToLatLon = () => {
     const xhr = new XMLHttpRequest();
     let url = null;
@@ -131,6 +131,7 @@ class Weather extends Component {
         searchHistoryTimeStamp: moment().format("MMMM Do YYYY, h:mm:ss a"),
       };
       this.setState((prevState) => ({
+        // For search history
         history: [newHistoryEntry, ...prevState.history],
       }));
     } else {
@@ -161,6 +162,7 @@ class Weather extends Component {
     }));
   };
 
+  // e.g. change from broken clouds to Broken Clouds
   toCapsWord = (inputString) => {
     const words = inputString.split(/[^a-zA-Z0-9]+/);
     const camelCasedWithSpaces = words

@@ -27,7 +27,7 @@ function SearchHistory({ history, onSearchAgain, onDelete }) {
                     <span className="city-name">{entry.countryName}</span>
                   )}
                 </Col>
-                <Col style={{ width: "10%" }}>
+                <Col className="sh-list">
                   <span className="small-font">
                     {entry.searchHistoryTimeStamp}
                   </span>
