@@ -9,6 +9,11 @@ import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import Button from "react-bootstrap/Button";
 import "./WeatherScreen.scss";
+import { BiSearchAlt } from "react-icons/bi";
+import { RxCross2 } from "react-icons/rx";
+import { CiLocationOn } from "react-icons/ci";
+import Image from "react-bootstrap/Image";
+import { BsSun, BsMoonStars } from "react-icons/bs";
 
 class Weather extends Component {
   constructor() {
@@ -24,18 +29,23 @@ class Weather extends Component {
       countryName: "",
       combineCityCountry: "",
       history: [],
+      notFound: false,
+      searchHistoryTimeStamp: new Date(),
+      greeting: "",
+      cloudImg: "",
     };
   }
 
   componentDidMount() {
     this.weatherDataCall();
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    // Called when the component updates (state or props change)
-    // You can check if specific conditions are met and call your function
-    if (this.state.lat !== prevState.lat || this.state.lon !== prevState.lon) {
-      this.weatherDataCall();
+    const now = new Date();
+    const currentHour = now.getHours();
+    if (currentHour >= 12 && currentHour <= 18) {
+      return this.setState({ greeting: "Good Afternoon!" });
+    } else if (currentHour > 18 && currentHour <= 23) {
+      return this.setState({ greeting: "Good Evening!" });
+    } else {
+      return this.setState({ greeting: "Good Morning!" });
     }
   }
 
@@ -46,7 +56,15 @@ class Weather extends Component {
     xhr.onload = () => {
       if (xhr.status === 200) {
         const data = JSON.parse(xhr.responseText);
-        this.setState({ weatherData: data, loading: false });
+        if (data) {
+          this.setState({
+            weatherData: data,
+            loading: false,
+            cloudImg: data.weather[0].description,
+          });
+        } else {
+          toast.error("No such City or Country!");
+        }
       } else {
         this.setState({ loading: false });
         console.error("Error fetching weather data.");
@@ -72,16 +90,22 @@ class Weather extends Component {
     xhr.onload = () => {
       if (xhr.status === 200) {
         const data = JSON.parse(xhr.responseText);
-        this.setState(
-          {
-            loading: false,
-            lat: data[0].lat,
-            lon: data[0].lon,
-          },
-          () => {
-            this.weatherDataCall();
-          }
-        );
+        if (data.length !== 0) {
+          this.setState(
+            {
+              loading: false,
+              lat: data[0].lat,
+              lon: data[0].lon,
+              notFound: false,
+            },
+            () => {
+              this.weatherDataCall();
+            }
+          );
+        } else {
+          toast.error("No such City or Country!");
+          this.setState({ notFound: true });
+        }
       } else {
         this.setState({ loading: false });
         console.error("Error fetching weather data.");
@@ -97,12 +121,14 @@ class Weather extends Component {
     this.setState({ countryName: e.target.value });
   };
 
+  // Current Search
   handleSearch = () => {
-    if (this.state.countryName  || this.state.cityName) {
+    if (this.state.countryName || this.state.cityName) {
       this.convertCountryCityToLatLon();
       const newHistoryEntry = {
         cityName: this.state.cityName,
         countryName: this.state.countryName,
+        searchHistoryTimeStamp: moment().format("MMMM Do YYYY, h:mm:ss a"),
       };
       this.setState((prevState) => ({
         history: [newHistoryEntry, ...prevState.history],
@@ -111,12 +137,48 @@ class Weather extends Component {
       toast.error("Please enter either City or Country");
     }
   };
+
   handleReset = () => {
     this.setState({ cityName: "", countryName: "" });
   };
 
+  // History Search
+  handleHistorySearch = async (entry) => {
+    await this.setState({
+      cityName: entry.cityName,
+      countryName: entry.countryName,
+    });
+    if (this.state.countryName || this.state.cityName) {
+      this.convertCountryCityToLatLon();
+    } else {
+      toast.error("No such City or Country!");
+    }
+  };
+
+  handleDelete = (entry) => {
+    this.setState((prevState) => ({
+      history: prevState.history.filter((item) => item !== entry),
+    }));
+  };
+
+  toCapsWord = (inputString) => {
+    const words = inputString.split(/[^a-zA-Z0-9]+/);
+    const camelCasedWithSpaces = words
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+
+    return camelCasedWithSpaces;
+  };
+
+  handleKeyPress = (event) => {
+    if (event.key === "Enter") {
+      this.handleSearch();
+    }
+  };
+
   render() {
     const { weatherData, loading } = this.state;
+    const { isDarkMode, toggleTheme } = this.props;
 
     if (loading) {
       return <div>Loading...</div>;
@@ -128,47 +190,143 @@ class Weather extends Component {
 
     return (
       <div>
-        <h2 className="ws-header">Today's Weather in {weatherData.name}</h2>
-        <hr></hr>
-        <Form>
-          <Row className="mb-5 ws-description">
-            <Col xs="auto">City Name:</Col>
-            <Col className="col-2">
-              <Form.Control
-                type="text"
-                onChange={this.handleCityChange}
-                value={this.state.cityName}
-              />
-            </Col>
-            <Col xs="auto">Country Code:</Col>
-            <Col className="col-2">
-              <Form.Control
-                type="text"
-                onChange={this.handleCountryChange}
-                value={this.state.countryName}
-              />
+        <div>
+          <Row className="mb-3 ws-search-header centered-row">
+            <Col xs="auto">
+              <Form.Floating className="mb-3 ">
+                <Form.Control
+                  id="floatingInputCustom"
+                  type="text"
+                  placeholder="City"
+                  onChange={this.handleCityChange}
+                  value={this.state.cityName}
+                  className="ws-form-background"
+                  onKeyDown={this.handleKeyPress}
+                />
+                <label
+                  htmlFor="floatingInputCustom"
+                  className="ws-search-label "
+                >
+                  City
+                </label>
+              </Form.Floating>
             </Col>
             <Col xs="auto">
-              <Button variant="primary" onClick={this.handleSearch}>
-                Submit
-              </Button>
+              <Form.Floating className="mb-3">
+                <Form.Control
+                  id="floatingInputCustom"
+                  type="text"
+                  placeholder="Country"
+                  onChange={this.handleCountryChange}
+                  value={this.state.countryName}
+                  className="ws-form-background"
+                  onKeyDown={this.handleKeyPress}
+                />
+                <label
+                  htmlFor="floatingInputCustom"
+                  className=" ws-search-label"
+                >
+                  Country Code
+                </label>
+              </Form.Floating>
             </Col>
             <Col xs="auto">
-              <Button variant="primary" onClick={this.handleReset}>
-                Reset
+              <Button
+                variant="outline-light"
+                className="mt-2"
+                onClick={this.handleSearch}
+              >
+                <BiSearchAlt />
               </Button>
+              <br></br>
+              <label className="ws-button-label">Search</label>
+            </Col>
+            <Col xs="auto" className="mt-2">
+              <Button variant="outline-light" onClick={this.handleReset}>
+                <RxCross2 />
+              </Button>
+              <br></br>
+              <label className="ws-button-label">Clear</label>
+            </Col>
+            <Col xs="auto" className="mt-2">
+              {isDarkMode ? (
+                <Button
+                  variant="outline-light"
+                  title="Dark theme"
+                  onClick={toggleTheme}
+                >
+                  <BsMoonStars />
+                </Button>
+              ) : (
+                <Button
+                  variant="outline-light"
+                  title="Light theme"
+                  onClick={toggleTheme}
+                >
+                  <BsSun />
+                </Button>
+              )}
+              <br></br>
+              <label className="ws-button-label">Theme</label>
             </Col>
           </Row>
-        </Form>
-        <div className="ws-description">
-          <p>Description: {weatherData.weather[0].description}</p>
-          <p>Temperature: {weatherData.main.temp}°C</p>
-          <p>Humidity: {weatherData.main.humidity}</p>
-          <p>Time: {this.state.currentTime}</p>
         </div>
-        <hr></hr>
+
+        {!this.state.notFound ? (
+          <div className="container">
+            <h2>Today's Weather</h2>
+            <h3>{this.state.greeting}</h3>
+            <p>
+              <CiLocationOn />
+              {weatherData.name}, {weatherData.sys.country}
+            </p>
+            <Row>
+              <Col>
+                <p>Temperature</p>
+                <h1 className="temp-color">
+                  {Math.round(weatherData.main.temp)}°C
+                </h1>
+              </Col>
+              <Col>
+                <Image
+                  src={
+                    this.state.cloudImg.includes("clouds") ||
+                    this.state.cloudImg.includes("thunderstorm") ||
+                    this.state.cloudImg.includes("rain") ||
+                    this.state.cloudImg.includes("drizzle")
+                      ? process.env.PUBLIC_URL + "/cloud.png"
+                      : process.env.PUBLIC_URL + "/sun.png"
+                  }
+                  style={{ width: "200px", height: "150px" }}
+                />{" "}
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <p>
+                  H:{Math.round(weatherData.main.temp_max)}°C L:
+                  {Math.round(weatherData.main.temp_min)}°C
+                </p>
+              </Col>
+              <Col>
+                <p>
+                  Description:{" "}
+                  {this.toCapsWord(weatherData.weather[0].description)}
+                </p>
+              </Col>
+            </Row>
+
+            <p>Humidity: {weatherData.main.humidity}</p>
+            <p>Time: {this.state.currentTime}</p>
+          </div>
+        ) : null}
+
         <div>
-          <SearchHistory history={this.state.history} />
+          <SearchHistory
+            history={this.state.history}
+            onSearchAgain={this.handleHistorySearch}
+            onDelete={this.handleDelete}
+          />
         </div>
       </div>
     );
