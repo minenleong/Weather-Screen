@@ -16,8 +16,8 @@ import Image from "react-bootstrap/Image";
 import { BsSun, BsMoonStars } from "react-icons/bs";
 
 // photo
-import cloudImg from './assets/cloud.png';
-import sunImg from './assets/sun.png';
+import cloudImg from '../../public/cloud.png';
+import sunImg from '../../public/sun.png';
 
 class Weather extends Component {
   constructor() {
