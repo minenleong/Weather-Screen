@@ -2,7 +2,7 @@ import "./App.scss";
 import WeatherScreen from "./Component/WeatherScreen";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(false);

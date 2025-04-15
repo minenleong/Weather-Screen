@@ -296,8 +296,8 @@ class Weather extends Component {
                     this.state.cloudImg.includes("thunderstorm") ||
                     this.state.cloudImg.includes("rain") ||
                     this.state.cloudImg.includes("drizzle")
-                      ? process.env.PUBLIC_URL + "/cloud.png"
-                      : process.env.PUBLIC_URL + "/sun.png"
+                      ? "/cloud.png"
+                      : "/sun.png"
                   }
                   style={{ width: "200px", height: "150px" }}
                 />{" "}
