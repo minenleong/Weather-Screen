@@ -80,11 +80,11 @@ class Weather extends Component {
     const xhr = new XMLHttpRequest();
     let url = null;
     if (this.state.cityName !== "" && this.state.countryName !== "") {
-      url = `http://api.openweathermap.org/geo/1.0/direct?q=${this.state.cityName},${this.state.countryName}&appid=${this.state.apiKey}`;
+      url = `https://api.openweathermap.org/geo/1.0/direct?q=${this.state.cityName},${this.state.countryName}&appid=${this.state.apiKey}`;
     } else if (this.state.cityName) {
-      url = `http://api.openweathermap.org/geo/1.0/direct?q=${this.state.cityName}&appid=${this.state.apiKey}`;
+      url = `https://api.openweathermap.org/geo/1.0/direct?q=${this.state.cityName}&appid=${this.state.apiKey}`;
     } else if (this.state.countryName) {
-      url = `http://api.openweathermap.org/geo/1.0/direct?q=${this.state.countryName}&appid=${this.state.apiKey}`;
+      url = `https://api.openweathermap.org/geo/1.0/direct?q=${this.state.countryName}&appid=${this.state.apiKey}`;
     }
     xhr.open("GET", url, true);
     xhr.onload = () => {
