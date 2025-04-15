@@ -15,6 +15,10 @@ import { CiLocationOn } from "react-icons/ci";
 import Image from "react-bootstrap/Image";
 import { BsSun, BsMoonStars } from "react-icons/bs";
 
+// photo
+import cloudImg from './assets/cloud.png';
+import sunImg from './assets/sun.png';
+
 class Weather extends Component {
   constructor() {
     super();
@@ -296,8 +300,8 @@ class Weather extends Component {
                     this.state.cloudImg.includes("thunderstorm") ||
                     this.state.cloudImg.includes("rain") ||
                     this.state.cloudImg.includes("drizzle")
-                      ? "/cloud.png"
-                      : "/sun.png"
+                      ? cloudImg
+                      : sunImg
                   }
                   style={{ width: "200px", height: "150px" }}
                 />{" "}
