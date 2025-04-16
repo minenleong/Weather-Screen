@@ -7,6 +7,11 @@
   padding: 20px;
   text-align: center;
   border-radius: 10px;
+
+   @media (max-width: 768px) {
+    width: 90%;
+    padding: 10px;
+  }
 }
 
 .ws-search-label::after {
@@ -52,6 +57,11 @@
   text-align: center;
   border-radius: 10px;
   background-color: rgba(255, 255, 255, 0.5);
+
+   @media (max-width: 768px) {
+    width: 95%;
+    padding: 10px;
+  }
 }
 
 .temp-color {
